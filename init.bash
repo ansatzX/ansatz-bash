@@ -10,9 +10,7 @@ esac
 # @see https://github.com/mooz/percol/issues/14#issuecomment-150964987
 # but you can upgrade bash
 # @see http://clubmate.fi/upgrade-to-bash-4-in-mac-os-x/
-if [ "${BASH_VERSION%%[^0-9]*}" -lt "4" ]; then
-    return;
-fi
+
 
 # Source global definitions (if any)
 if [ -f /etc/bashrc ]; then
@@ -29,20 +27,20 @@ if [ -f /etc/bash.bashrc ]; then
     . /etc/bash.bashrc
 fi
 
-# {{ Shell in Emacs sets $TERM to "dumb"
-if [ "${TERM}" != "dumb" ]; then
-    # enable bash completion
-    # @see http://www.simplicidade.org/notes/archives/2008/02/bash_completion.html
-    if [ -f /etc/bash_completion ]; then
-        # ArchLinux
-        . /etc/bash_completion
-    elif [ -f /etc/profile.d/bash-completion.sh ]; then
-        # Gentoo Linux
-        . /etc/profile.d/bash-completion.sh
-    elif [ ! -z $BASH_COMPLETION ]; then
-        . $BASH_COMPLETION
-    fi
-fi
+# # {{ Shell in Emacs sets $TERM to "dumb"
+#if [ "${TERM}" != "dumb" ]; then
+#    # enable bash completion
+#    # @see http://www.simplicidade.org/notes/archives/2008/02/bash_completion.html
+#    if [ -f /etc/bash_completion ]; then
+#        # ArchLinux
+#        . /etc/bash_completion
+#    elif [ -f /etc/profile.d/bash-completion.sh ]; then
+#        # Gentoo Linux
+#        . /etc/profile.d/bash-completion.sh
+#    elif [ ! -z $BASH_COMPLETION ]; then
+#        . $BASH_COMPLETION
+#    fi
+#fi
 # }}
 
 if [ -d $HOME/bash_completion.d ]; then
@@ -53,7 +51,7 @@ fi
 
 
 if [ "$OSTYPE" = "cygwin" ]; then
-    OS_NAME='CYGWIN'
+	  OS_NAME='CYGWIN'
 elif [ "`uname -s`" = "Darwin" ]; then
     OS_NAME="Darwin"
 elif grep -q Microsoft /proc/version; then
@@ -85,11 +83,19 @@ if [ "$OS_NAME" = "Darwin" ]; then
 
 fi
 
+if [ "${BASH_VERSION%%[^0-9]*}" -lt "4" ]; then
+	return;
+fi
+
 
 function proxyme {
-  #export hostip=$(ip route | grep default | awk '{print $3}')
-  export hostip=localhost
-  export SOCKS5_PROXY=socks5://${hostip}:22801
+  if [ "$OS_NAME" = "WSL" ]; then
+		export hostip=$(ip route | grep default | awk '{print $3}')
+	else 
+		export hostip=localhost
+	fi
+
+	export SOCKS5_PROXY=socks5://${hostip}:22801
   export HTTP_PROXY=${hostip}:22801
   export HTTPS_PROXY=${hostip}:22801
   git config --global http.proxy ${SOCKS5_PROXY}
